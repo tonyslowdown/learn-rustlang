@@ -64,7 +64,7 @@ fn main() {
 ### Array
 
 - Elements must all be same type.
-- Fixed length, unlike vector, which can grow.
+  - Fixed length, unlike vector, which can grow.
 - Useful when you want to store data in the stack than the heap.
 
 ```rust
@@ -352,4 +352,118 @@ fn main() {
     let word = first_word(my_string_literal);
 }
 ```
+
+## Structs
+
+```rust
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+let mut user1 = User {
+	email: String::from("someone@example.com"),
+	username: String::from("someusername123"),
+	active: true,
+	sign_in_count: 1,
+};
+
+user1.email = String::from("anotheremail@example.com");
+
+// *Field init shorthand* syntax provides a way to avoid writing field names twice.
+fn build_user(email: String, username: String) -> User {
+    User {
+        email, // avoid email: email
+        username,
+        active: true,
+        sign_in_count: 1,
+    }
+}
+
+// *Struct update syntax* enables copying field values from another struct.
+let user2 = User {
+	email: String::from("another@example.com"),
+	username: String::from("anotherusername567"),
+	..user1 // copy the rest of the field values from user1
+};
+```
+
+`Tuple Structs` are similar to structs, without the named fields. So they're basically like tuples, but give you the ability to name the type differently.
+
+```rust
+fn main() {
+    struct Color(i32, i32, i32);
+    struct Point(i32, i32, i32);
+	
+	// `black` and `origin` are different types even though they're made of the same `i32` triplets.
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+	
+	let (x, y, z) = origin;
+	let r = black.0;
+	let g = black.1;
+	let b = black.2;
+}
+
+```
+
+To use references in struct field values, you have to provide lifetime parameter.
+
+
+## Methods
+
+Methods are functions defined within the context of a struct, enum or trait.
+
+First parameter is always `self`.
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+	// Methods can borrow self mutably or immutably.
+    fn area(&self) -> u32 {
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        rect1.area()
+    );
+}
+```
+
+*Automatic referencing and dereferencing* is a feature where calling methods that define various types of borrows can be done by an object without actually applying these operators on the object itself. For example, if a method takes `&mut self` as an argument, the compiler will automatically apply the operators on the calling object.
+
+
+## Associated Functions
+
+Defined in `impl` blocks without `self` param.
+
+Usually for constructors.
+
+```rust
+impl Rectangle {
+    fn square(size: u32) -> Rectangle {
+        Rectangle {
+            width: size,
+            height: size,
+        }
+    }
+}
+```
+
+Structs can have multiple `impl` blocks.
 
