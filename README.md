@@ -467,3 +467,161 @@ impl Rectangle {
 
 Structs can have multiple `impl` blocks.
 
+## Enums
+
+Enumerations are like algebraic data types in Haskell.
+
+```rust
+
+fn main() {
+    enum IpAddr {
+        V4(u8, u8, u8, u8),
+        V6(String),
+    }
+
+    let home = IpAddr::V4(127, 0, 0, 1);
+
+    let loopback = IpAddr::V6(String::from("::1"));
+}
+```
+
+```rust
+
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+// Similar implementation using structs.
+struct QuitMessage; // unit struct
+struct MoveMessage {
+    x: i32,
+    y: i32,
+}
+struct WriteMessage(String); // tuple struct
+struct ChangeColorMessage(i32, i32, i32); // tuple struct
+```
+
+Using structs would not allow methods that take all the struct types. Probably since no inheritance.
+
+```rust
+fn main() {
+    enum Message {
+        Quit,
+        Move { x: i32, y: i32 },
+        Write(String),
+        ChangeColor(i32, i32, i32),
+    }
+
+    impl Message {
+        fn call(&self) {
+            // method body would be defined here
+        }
+    }
+
+    let m = Message::Write(String::from("hello"));
+    m.call();
+}
+```
+
+No *null* values in Rust. Use the `Option<T>` enum.
+
+```rust
+fn main() {
+    let some_number = Some(5);
+    let some_string = Some("a string");
+
+	// Must tell compiler the T is i32.
+    let absent_number: Option<i32> = None;
+}
+```
+
+## Match Expressions
+
+```rust
+#[derive(Debug)] // so we can inspect the state in a minute
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("State quarter from {:?}!", state);
+            25
+        }
+    }
+}
+
+fn main() {
+    value_in_cents(Coin::Quarter(UsState::Alaska));
+}
+```
+
+Matches must be exhausive. There must be an arm for every possible enum value.
+
+
+```rust
+fn main() {
+    let some_u8_value = 0u8;
+    match some_u8_value {
+        1 => println!("one"),
+        3 => println!("three"),
+        5 => println!("five"),
+        7 => println!("seven"),
+        _ => (), // For the default case, do nothing and return the "unit value".
+    }
+}
+```
+
+## `if let`
+
+Syntactic sugar for a match on only one pattern and ignoring all others.
+
+```rust
+fn main() {
+    let some_u8_value = Some(0u8);
+    match some_u8_value {
+        Some(3) => println!("three"),
+        _ => (),
+    }
+
+	// Does the same thing but shorter.
+    if let Some(3) = some_u8_value {
+        println!("three");
+    }
+}
+```
+ 
+`if let` also has an `else` which is the same as using the `_` arm in a match block, but this appears to be more verbose, so the match block seems to be more concise?
+
+
+
